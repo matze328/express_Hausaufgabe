@@ -1,7 +1,7 @@
 const { Router } = require("express");
 const { StatusCodes, ReasonPhrases } = require("http-status-codes");
 const UserModel = require("../../database/models/UserModel");
-const { decodeAccessToken } = require("../utils/jwtUtils");
+const { decodeAccessToken } = require("../../services/auth/AccessToken");
 
 const UserRouter = Router();
 
