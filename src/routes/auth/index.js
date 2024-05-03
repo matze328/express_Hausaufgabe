@@ -1,5 +1,7 @@
 const { Router } = require("express");
 const { StatusCodes, ReasonPhrases } = require("http-status-codes");
+const UserModel = require("../../database/models/UserModel");
+const { createAccessToken } = require("../utils/jwtUtils");
 
 const AuthRouter = Router();
 
@@ -7,20 +9,34 @@ const AuthRouter = Router();
 
 AuthRouter.post("/login", async (req, res) => {
   const { email, password } = req.body;
-  // TODO: Login basierend auf email/password
-  // Token soll erstellt werden und zurückgegeben werden
-  res.send("Ich bin nur ein Platzhalter");
+  const user = await UserModel.findOne({ email });
+
+  if (!user || user.password !== password) {
+    res.status(StatusCodes.UNAUTHORIZED).send(ReasonPhrases.UNAUTHORIZED);
+    return;
+  }
+  const accessToken = createAccessToken(user.id);
+  res.json({ accessToken });
 });
 
 AuthRouter.post("/signup", async (req, res) => {
   const { email, password, name, profileImgUrl } = req.body;
+
   if (!email || !password || !name || !profileImgUrl) {
     res.status(StatusCodes.BAD_REQUEST).send(ReasonPhrases.BAD_REQUEST);
     return;
   }
-  // TODO: Signup basierend auf email, password, name, profileImgUrl
-  // Token soll erstellt werden und zurückgegeben werden
-  res.send("Ich bin nur ein Platzhalter");
+
+ try {
+    const newUser = new UserModel({ email, password, name, profileImgUrl });
+    await newUser.save();
+
+   const accessToken = createAccessToken(newUser.id);
+    res.json({ accessToken });
+  } catch (error) {
+    console.error(error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(ReasonPhrases.INTERNAL_SERVER_ERROR);
+  }
 });
 
 module.exports = { AuthRouter };
