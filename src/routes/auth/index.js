@@ -9,12 +9,14 @@ const AuthRouter = Router();
 
 AuthRouter.post("/login", async (req, res) => {
   const { email, password } = req.body;
-  const user = await UserModel.findOne({ email });
+  const user = await UserModel.scope("allData").findOne({ email });
 
   if (!user || user.password !== password) {
     res.status(StatusCodes.UNAUTHORIZED).send(ReasonPhrases.UNAUTHORIZED);
     return;
   }
+  user.password = null;
+  
   const accessToken = createAccessToken(user.id);
   res.json({ accessToken });
 });
