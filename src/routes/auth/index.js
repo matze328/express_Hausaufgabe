@@ -32,7 +32,7 @@ AuthRouter.post("/signup", async (req, res) => {
  try {
     const newUser = new UserModel({ email, password, name, profileImgUrl });
     await newUser.save();
-
+    user.password = null;
    const accessToken = createAccessToken(newUser.id);
     res.json({ accessToken });
   } catch (error) {
